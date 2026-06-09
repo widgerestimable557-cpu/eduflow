@@ -1,0 +1,9 @@
+{
+  "name": "eduflow",
+  "version": "1.0.0",
+  "description": "EduFlow PWA",
+  "scripts": {
+    "build": "echo 'No build step needed for vanilla JS'"
+  },
+  "dependencies": {}
+}
