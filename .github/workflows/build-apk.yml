@@ -1,0 +1,111 @@
+name: Build EduFlow APK (TWA)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  APP_URL: "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec"
+  PACKAGE_ID: "com.eduflow.app"
+  APP_NAME: "EduFlow"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Configure Bubblewrap
+        run: |
+          mkdir -p ~/.bubblewrap
+          echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
+
+      - name: Create TWA manifest
+        run: |
+          mkdir -p twa-build
+          cat > twa-build/twa-manifest.json << 'MANIFEST'
+          {
+            "packageId": "com.eduflow.app",
+            "host": "script.google.com",
+            "name": "EduFlow",
+            "launcherName": "EduFlow",
+            "display": "standalone",
+            "orientation": "portrait",
+            "themeColor": "#4F46E5",
+            "navigationColor": "#000000",
+            "navigationColorDark": "#000000",
+            "navigationDividerColor": "#000000",
+            "navigationDividerColorDark": "#000000",
+            "backgroundColor": "#ffffff",
+            "startUrl": "/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
+            "iconUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec/icons/icon-512x512.png",
+            "maskableIconUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec/icons/icon-512x512.png",
+            "appVersion": "1",
+            "appVersionCode": 1,
+            "signingKey": { "path": "./android.keystore", "alias": "eduflow" },
+            "splashScreenFadeOutDuration": 300,
+            "enableNotifications": false,
+            "shortcuts": [],
+            "generatorApp": "bubblewrap-cli",
+            "webManifestUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec/manifest.json",
+            "fallbackType": "customtabs",
+            "features": {},
+            "alphaDependencies": { "enabled": false },
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
+            "minSdkVersion": 19,
+            "fingerprints": []
+          }
+          MANIFEST
+
+      - name: Generate Android project
+        working-directory: twa-build
+        run: bubblewrap update --skipPwaValidation
+
+      - name: Generate keystore
+        working-directory: twa-build
+        run: |
+          keytool -genkeypair -v \
+            -keystore android.keystore \
+            -alias eduflow \
+            -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=EduFlow,OU=Dev,O=EduFlow,L=PAP,S=Ouest,C=HT" \
+            -storepass android \
+            -keypass android
+
+      - name: Build APK
+        working-directory: twa-build
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=android.keystore \
+            -Pandroid.injected.signing.store.password=android \
+            -Pandroid.injected.signing.key.alias=eduflow \
+            -Pandroid.injected.signing.key.password=android \
+            --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: eduflow-release
+          path: twa-build/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
