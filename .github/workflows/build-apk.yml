@@ -76,7 +76,7 @@ jobs:
               "isChromeOSOnly": False,
               "isMetaQuest": False,
               "fullScopeUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
-              "minSdkVersion": 19,
+              "minSdkVersion": 21,
               "fingerprints": []
           }
 
