@@ -63,7 +63,7 @@ jobs:
               "maskableIconUrl": "http://localhost:8080/icons/icon-512x512.png",
               "appVersion": "1",
               "appVersionCode": 1,
-              "signingKey": {"path": "./android.keystore", "alias": "eduflow"},
+              "signingKey": {"path": "../android.keystore", "alias": "eduflow"},
               "splashScreenFadeOutDuration": 300,
               "enableNotifications": False,
               "shortcuts": [],
