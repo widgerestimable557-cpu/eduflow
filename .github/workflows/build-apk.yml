@@ -31,15 +31,19 @@ jobs:
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
 
-      - name: Generate twa-manifest.json with base64 icon
+      - name: Start local HTTP server for assets
         run: |
-          python3 - << 'PYEOF'
-          import base64, json, os
+          cd www
+          python3 -m http.server 8080 &
+          echo "SERVER_PID=$!" >> $GITHUB_ENV
+          sleep 2
+          curl -I http://localhost:8080/icons/icon-512x512.png
 
-          icon_path = "www/icons/icon-512x512.png"
-          with open(icon_path, "rb") as f:
-              icon_b64 = base64.b64encode(f.read()).decode()
-          icon_data_url = f"data:image/png;base64,{icon_b64}"
+      - name: Generate twa-manifest.json
+        run: |
+          mkdir -p twa-build
+          python3 - << 'PYEOF'
+          import json, os
 
           manifest = {
               "packageId": "com.eduflow.app",
@@ -55,8 +59,8 @@ jobs:
               "navigationDividerColorDark": "#000000",
               "backgroundColor": "#ffffff",
               "startUrl": "/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
-              "iconUrl": icon_data_url,
-              "maskableIconUrl": icon_data_url,
+              "iconUrl": "http://localhost:8080/icons/icon-512x512.png",
+              "maskableIconUrl": "http://localhost:8080/icons/icon-512x512.png",
               "appVersion": "1",
               "appVersionCode": 1,
               "signingKey": {"path": "./android.keystore", "alias": "eduflow"},
@@ -64,7 +68,7 @@ jobs:
               "enableNotifications": False,
               "shortcuts": [],
               "generatorApp": "bubblewrap-cli",
-              "webManifestUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec/manifest.json",
+              "webManifestUrl": "http://localhost:8080/manifest.json",
               "fallbackType": "customtabs",
               "features": {},
               "alphaDependencies": {"enabled": False},
@@ -76,15 +80,18 @@ jobs:
               "fingerprints": []
           }
 
-          os.makedirs("twa-build", exist_ok=True)
           with open("twa-build/twa-manifest.json", "w") as f:
               json.dump(manifest, f, indent=2)
-          print("OK - twa-manifest.json generated with base64 icon")
+          print("OK - twa-manifest.json generated")
           PYEOF
 
       - name: Generate Android project
         working-directory: twa-build
         run: bubblewrap update --skipPwaValidation
+
+      - name: Stop local server
+        if: always()
+        run: kill $SERVER_PID 2>/dev/null || true
 
       - name: Generate keystore
         working-directory: twa-build
