@@ -23,64 +23,64 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install -g @bubblewrap/cli @bubblewrap/core
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
 
       - name: Configure Bubblewrap
         run: |
           mkdir -p ~/.bubblewrap
           echo "{\"jdkPath\":\"$JAVA_HOME\",\"androidSdkPath\":\"$ANDROID_HOME\"}" > ~/.bubblewrap/config.json
 
-      - name: Generate Android project via Node script
+      - name: Generate twa-manifest.json with base64 icon
         run: |
-          node << 'NODESCRIPT'
-          const fs = require('fs');
-          const path = require('path');
-          const { TwaManifest } = require('@bubblewrap/core');
+          python3 - << 'PYEOF'
+          import base64, json, os
 
-          // Lit l'icône locale en base64
-          const iconPath = path.resolve('www/icons/icon-512x512.png');
-          const iconBase64 = fs.readFileSync(iconPath).toString('base64');
+          icon_path = "www/icons/icon-512x512.png"
+          with open(icon_path, "rb") as f:
+              icon_b64 = base64.b64encode(f.read()).decode()
+          icon_data_url = f"data:image/png;base64,{icon_b64}"
 
-          const manifest = {
-            packageId: 'com.eduflow.app',
-            host: 'script.google.com',
-            name: 'EduFlow',
-            launcherName: 'EduFlow',
-            display: 'standalone',
-            orientation: 'portrait',
-            themeColor: '#4F46E5',
-            navigationColor: '#000000',
-            navigationColorDark: '#000000',
-            navigationDividerColor: '#000000',
-            navigationDividerColorDark: '#000000',
-            backgroundColor: '#ffffff',
-            startUrl: '/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec',
-            iconUrl: `data:image/png;base64,${iconBase64}`,
-            maskableIconUrl: `data:image/png;base64,${iconBase64}`,
-            appVersion: '1',
-            appVersionCode: 1,
-            signingKey: { path: './android.keystore', alias: 'eduflow' },
-            splashScreenFadeOutDuration: 300,
-            enableNotifications: false,
-            shortcuts: [],
-            generatorApp: 'bubblewrap-cli',
-            webManifestUrl: 'https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec/manifest.json',
-            fallbackType: 'customtabs',
-            features: {},
-            alphaDependencies: { enabled: false },
-            enableSiteSettingsShortcut: true,
-            isChromeOSOnly: false,
-            isMetaQuest: false,
-            fullScopeUrl: 'https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec',
-            minSdkVersion: 19,
-            fingerprints: []
-          };
+          manifest = {
+              "packageId": "com.eduflow.app",
+              "host": "script.google.com",
+              "name": "EduFlow",
+              "launcherName": "EduFlow",
+              "display": "standalone",
+              "orientation": "portrait",
+              "themeColor": "#4F46E5",
+              "navigationColor": "#000000",
+              "navigationColorDark": "#000000",
+              "navigationDividerColor": "#000000",
+              "navigationDividerColorDark": "#000000",
+              "backgroundColor": "#ffffff",
+              "startUrl": "/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
+              "iconUrl": icon_data_url,
+              "maskableIconUrl": icon_data_url,
+              "appVersion": "1",
+              "appVersionCode": 1,
+              "signingKey": {"path": "./android.keystore", "alias": "eduflow"},
+              "splashScreenFadeOutDuration": 300,
+              "enableNotifications": False,
+              "shortcuts": [],
+              "generatorApp": "bubblewrap-cli",
+              "webManifestUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec/manifest.json",
+              "fallbackType": "customtabs",
+              "features": {},
+              "alphaDependencies": {"enabled": False},
+              "enableSiteSettingsShortcut": True,
+              "isChromeOSOnly": False,
+              "isMetaQuest": False,
+              "fullScopeUrl": "https://script.google.com/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
+              "minSdkVersion": 19,
+              "fingerprints": []
+          }
 
-          fs.mkdirSync('twa-build', { recursive: true });
-          fs.writeFileSync('twa-build/twa-manifest.json', JSON.stringify(manifest, null, 2));
-          console.log('twa-manifest.json écrit avec icône base64');
-          NODESCRIPT
+          os.makedirs("twa-build", exist_ok=True)
+          with open("twa-build/twa-manifest.json", "w") as f:
+              json.dump(manifest, f, indent=2)
+          print("OK - twa-manifest.json generated with base64 icon")
+          PYEOF
 
       - name: Generate Android project
         working-directory: twa-build
