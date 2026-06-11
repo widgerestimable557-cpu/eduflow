@@ -63,7 +63,7 @@ jobs:
               "maskableIconUrl": "http://localhost:8080/icons/icon-512x512.png",
               "appVersion": "1",
               "appVersionCode": 1,
-              "signingKey": {"path": "../android.keystore", "alias": "eduflow"},
+              "signingKey": {"path": "./android.keystore", "alias": "eduflow"},
               "splashScreenFadeOutDuration": 300,
               "enableNotifications": False,
               "shortcuts": [],
@@ -110,7 +110,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=android.keystore \
+            -Pandroid.injected.signing.store.file=$(pwd)/android.keystore \
             -Pandroid.injected.signing.store.password=android \
             -Pandroid.injected.signing.key.alias=eduflow \
             -Pandroid.injected.signing.key.password=android \
