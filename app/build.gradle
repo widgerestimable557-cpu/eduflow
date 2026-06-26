@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace "com.eduflow.app"
     compileSdkVersion 34
     defaultConfig {
         applicationId "com.eduflow.app"
