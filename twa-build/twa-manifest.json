@@ -1,0 +1,41 @@
+{
+  "packageId": "com.eduflow.app",
+  "host": "script.google.com",
+  "name": "",
+  "launcherName": "",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#4F46E5",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#ffffff",
+  "startUrl": "/macros/s/AKfycbwn_52M5pMF53wvo1NhL1REc7oYFaKCIjZDUNIsClqQYYasyBe9y6-S5pFoygnqtv2y/exec",
+  "iconUrl": "/icons/icon-512x512.png",
+  "maskableIconUrl": "/icons/icon-512x512.png",
+  "appVersion": "1",
+  "appVersionCode": 1,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "eduflow"
+  },
+  "splashScreenFadeOutDuration": 300,
+  "enableNotifications": false,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "",
+  "minSdkVersion": 19,
+  "fingerprints": [
+    "1E:9A:38:C4:28:24:B4:48:2E:F0:48:2B:A3:55:E3:0F:30:83:B6:78:63:B5:69:81:FB:3A:D8:6F:1F:47:94:F2"
+  ]
+}
