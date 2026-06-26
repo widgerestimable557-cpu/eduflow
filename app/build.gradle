@@ -12,7 +12,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file("../../android.keystore")
+            storeFile file("../android.keystore")
             storePassword "android"
             keyAlias "eduflow"
             keyPassword "android"
